@@ -22,8 +22,8 @@ module Keycloak
 
   module Client
     class << self
-      attr_accessor :realm, :auth_server_url
-      attr_reader :client_id, :secret, :configuration, :public_key
+      attr_accessor :realm, :auth_server_url, :client_id, :secret
+      attr_reader :configuration, :public_key
     end
 
     KEYCLOAK_JSON_FILE = 'keycloak.json'
@@ -53,38 +53,38 @@ module Keycloak
     end
 
     def self.get_token_by_exchange(issuer, issuer_token)
-      setup_module 
-      
+      setup_module
+
       payload = { 'client_id' => @client_id, 'client_secret' => @secret, 'audience' => @client_id, 'grant_type' => 'urn:ietf:params:oauth:grant-type:token-exchange', 'subject_token_type' => 'urn:ietf:params:oauth:token-type:access_token', 'subject_issuer' => issuer, 'subject_token' => issuer_token }
-      header = {'Content-Type' => 'application/x-www-form-urlencoded'} 
+      header = {'Content-Type' => 'application/x-www-form-urlencoded'}
      _request = -> do
-        RestClient.post(@configuration['token_endpoint'], payload, header){|response, request, result| 
-        # case response.code 
-        # when 200 
-        # response.body 
-        # else 
-        # response.return! 
-        # end 
-        response.body 
+        RestClient.post(@configuration['token_endpoint'], payload, header){|response, request, result|
+        # case response.code
+        # when 200
+        # response.body
+        # else
+        # response.return!
+        # end
+        response.body
       }
       end
-       
-        exec_request _request 
+
+        exec_request _request
     end
 
     def self.get_userinfo_issuer(access_token = '')
       verify_setup
-      
+
       access_token = self.token["access_token"] if access_token.empty?
       payload = { 'access_token' => access_token }
       header = { 'Content-Type' => 'application/x-www-form-urlencoded' }
       _request = -> do
         RestClient.post(@configuration['userinfo_endpoint'], payload, header){ |response, request, result|
-          response.body 
-        } 
+          response.body
+        }
       end
-      
-      exec_request _request 
+
+      exec_request _request
     end
 
     def self.get_token_by_refresh_token(refresh_token = '')
