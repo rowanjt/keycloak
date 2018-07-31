@@ -28,6 +28,10 @@ module Keycloak
 
     KEYCLOAK_JSON_FILE = 'keycloak.json'
 
+    def self.set_installation_file(file=nil)
+      @installation_file = file || KEYCLOAK_JSON_FILE
+    end
+
     def self.get_token(user, password)
       setup_module
 
@@ -286,8 +290,8 @@ module Keycloak
       KEYCLOACK_CONTROLLER_DEFAULT = 'session'
 
       def self.get_installation
-        if File.exists?(KEYCLOAK_JSON_FILE)
-          installation = JSON File.read(KEYCLOAK_JSON_FILE)
+        if File.exists?(@installation_file)
+          installation = JSON File.read(@installation_file)
           @realm = installation["realm"]
           @client_id = installation["resource"]
           @secret = installation["credentials"]["secret"]
@@ -296,7 +300,7 @@ module Keycloak
           openid_configuration
         else
           if Keycloak.realm.blank? || Keycloak.auth_server_url.blank?
-            raise "#{KEYCLOAK_JSON_FILE} and relm settings not found."
+            raise "#{@installation_file} and relm settings not found."
           else
             @realm = Keycloak.realm
             @auth_server_url = Keycloak.auth_server_url
